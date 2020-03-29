@@ -167,7 +167,7 @@ class NewExtractor(FeatureExtractor):
     def getFeatures(self, state, action):
         """
         Returns features for Pacman:
-        - #whether food will be eaten
+        - whether food will be eaten
         - how far away is the next capsule
         - inverse distance the next food is
         - whether a ghost collision is imminent
@@ -195,7 +195,7 @@ class NewExtractor(FeatureExtractor):
         next_x, next_y = int(x + dx), int(y + dy)
 
         # count the number of ghosts 1-step away
-        features["#-of-ghosts-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(g, walls) for g in ghosts)
+        features["#-of-ghosts-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(g, walls) for g in activeGhostPos)
         
         # the distance to the nearest active ghost
         #idea: give the distance to other ghost as well as a weighted sum
