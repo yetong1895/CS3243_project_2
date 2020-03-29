@@ -167,12 +167,13 @@ class NewExtractor(FeatureExtractor):
     def getFeatures(self, state, action):
         """
         Returns features for Pacman:
-        - whether food will be eaten
-        - how far away is the next capsule
-        - inverse distance the next food is
+        - whether food will be eaten 
+        - inverse min distance of capsule
+        - inverse min distance of food
         - whether a ghost collision is imminent
-        - how far away is the nearest ghost
-        - whether a ghost can be eaten and it's distance
+        - inverse min distance to nearest active ghost
+        - inverse min distance to nearest scared ghost
+        - whether it will eat a ghost
         """
         # extract the grid of food and wall locations and get the ghost locations
         food = state.getFood()
@@ -185,6 +186,8 @@ class NewExtractor(FeatureExtractor):
 
         #idea: use distance from ghost and negate it depending on whether they are scared
 
+        #idea: use a linear combination to represent distance to food, currently will leave one portion of food alone
+
         features = util.Counter()
 
         features["bias"] = 1.0
@@ -193,9 +196,9 @@ class NewExtractor(FeatureExtractor):
         x, y = state.getPacmanPosition()
         dx, dy = Actions.directionToVector(action)
         next_x, next_y = int(x + dx), int(y + dy)
-
-        # count the number of ghosts 1-step away
-        features["#-of-ghosts-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(g, walls) for g in activeGhostPos)
+    
+        # count the number of active ghosts 1 step away from player
+        features["#-of-active-ghosts-1-step-away"] = sum((next_x, next_y) in Actions.getLegalNeighbors(g, walls) for g in activeGhostPos)
         
         # the distance to the nearest active ghost
         #idea: give the distance to other ghost as well as a weighted sum
@@ -203,29 +206,36 @@ class NewExtractor(FeatureExtractor):
         if distGhost is not None:
             # make the distance a number less than one otherwise the update
             # will diverge wildly
-                features["closest-active-ghost"] = 1 - float (distGhost) / (walls.width * walls.height)
+            features["closest-active-ghost"] = 1 / (float (distGhost) + 1)
 
         distGhostScared = self.closestGhost((next_x, next_y), scaredGhostPos, walls)
+
         if distGhostScared is not None:
             # make the distance a number less than one otherwise the update
             # will diverge wildly
-                features["closest-scared-ghost"] = float (distGhostScared) / (walls.width * walls.height)
+            features["closest-scared-ghost"] = 1 / (float (distGhostScared) + 1)
 
-        # if there is no danger of ghosts then add the food feature
-        if not features["#-of-ghosts-1-step-away"] and food[next_x][next_y]:
-            features["eats-food"] = 1.0
+        # if there is no danger of ghosts 
+        if not features["#-of-active-ghosts-1-step-away"]: 
+            #then add the food feature
+            if food[next_x][next_y]:
+                features["eats-food"] = 1.0
+
+            # if there is no danger of ghosts whether it will eat a ghost
+            if (next_x, next_y) in scaredGhostPos:
+                features["eats-ghost"] = 1.0
 
         distFood = closestFood((next_x, next_y), food, walls)
         if distFood is not None:
             # make the distance a number less than one otherwise the update
             # will diverge wildly
-            features["closest-food"] = 1 - float(distFood) / (walls.width * walls.height)
+            features["closest-food"] = 1 / (float(distFood) + 1)
 
         distCapsule = self.closestCapsule((next_x, next_y), capsules, walls)
         if distCapsule is not None:
             # make the distance a number less than one otherwise the update
             # will diverge wildly
-            features["closest-capsule"] = 1 - float(distCapsule) / (walls.width * walls.height)
+            features["closest-capsule"] = 1 / (float(distCapsule) + 1)
 
         features.divideAll(10.0)
         return features
