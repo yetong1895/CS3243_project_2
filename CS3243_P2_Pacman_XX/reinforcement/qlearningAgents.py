@@ -126,8 +126,8 @@ class QLearningAgent(ReinforcementAgent):
 
           NOTE: You should never call this function,
           it will be called on your behalf
+          Q(s, a) = Q(s, a) + a'(R(s) + y maxQ(next_s, next_a) - Q(s, a))
         """
-        "Q(s, a) = Q(s, a) + α(R(s) + γ maxQ(next_s, next_a) − Q(s, a))"
         q_value = self.getQValue(state, action)
         future_q = reward + self.discount * self.computeValueFromQValues(nextState) - q_value
 
@@ -193,15 +193,28 @@ class ApproximateQAgent(PacmanQAgent):
           Should return Q(state,action) = w * featureVector
           where * is the dotProduct operator
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        features = self.featExtractor.getFeatures(state, action)
+        qValue = 0
+
+        for feature in features:
+          qValue += self.weights[feature] * features[feature]
+
+        return qValue
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
+           difference = (r + y * maxaQ(s', a')) - Q(s, a) 
+           wi <- wi + a * difference * fi(s, a)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        q_value = self.getQValue(state, action)
+
+        difference = reward + self.discount * self.computeValueFromQValues(nextState) - q_value
+        newWeightValue = self.alpha * difference
+        features = self.featExtractor.getFeatures(state, action)
+
+        for feature in features:
+          self.weights[feature] += newWeightValue * features[feature]
 
     def final(self, state):
         "Called at the end of each game."
@@ -212,4 +225,7 @@ class ApproximateQAgent(PacmanQAgent):
         if self.episodesSoFar == self.numTraining:
             # you might want to print your weights here for debugging
             "*** YOUR CODE HERE ***"
+            
+            for weight in self.weights:
+               print("weight: " + str(weight) + " value: " + str(self.weights[weight]) + "\n")
             pass
