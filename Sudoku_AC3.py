@@ -52,7 +52,7 @@ class Sudoku(object):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
 	def csp(self): 
-		variables = deque()
+		variables = dict{}
 		for i in range(9):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
@@ -86,7 +86,7 @@ class Sudoku(object):
 								neighbor.append((s_i, s_j))
 					
 					new_variable = Variable(i, j, domain, count, neighbor) #create new variable		
-					variables.append(new_variable)
+					variables[(i, j)] = new_variable
 		return variables
 	
 	def AC3(self, queue = None, removals=None)
@@ -103,10 +103,10 @@ class Sudoku(object):
 			#no more empty space
 			return True
 			
-		if(self.select_variables() is False): ##############
+		if(self.select_variables() is False): ############## need to change
 			return False
 		else:
-			row, col, value_list, number_of_values = self.select_variables() ###############
+			row, col, value_list, number_of_values = self.select_variables() ############### need to change
 			while(number_of_values > 0):
 				num = value_list.popleft()
 				number_of_values -= 1
