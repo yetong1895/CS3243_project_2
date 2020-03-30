@@ -59,6 +59,10 @@ class QLearningAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
+        # maxQvalue = self.getQValue(state, self.computeActionFromQValues(state))
+        # if maxQvalue is None:
+        #   return 0.0
+        # return maxQvalue
         legal_actions = self.getLegalActions(state)
 
         if not legal_actions:
@@ -89,7 +93,7 @@ class QLearningAgent(ReinforcementAgent):
         for action in legal_actions:
           v = self.getQValue(state, action)
           if v > best_action[1]:
-            best_action =  ([action], v)
+            best_action = ([action], v)
           if v == best_action[1]:
             best_action[0].append(action)
 
@@ -114,8 +118,8 @@ class QLearningAgent(ReinforcementAgent):
    
         if util.flipCoin(self.epsilon):
           return random.choice(legal_actions)
-
-        return self.computeActionFromQValues(state)
+        else: 
+          return self.computeActionFromQValues(state)
 
 
     def update(self, state, action, nextState, reward):
@@ -214,6 +218,8 @@ class ApproximateQAgent(PacmanQAgent):
         features = self.featExtractor.getFeatures(state, action)
 
         for feature in features:
+          if feature == "#value-of-tunnel-multiplied-active-ghost":
+              print("weight: " + str(self.weights[feature]) + " " + str(newWeightValue) + " " + str(features["#value-of-tunnel-multiplied-active-ghost"]))
           self.weights[feature] += newWeightValue * features[feature]
 
     def final(self, state):
