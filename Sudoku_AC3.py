@@ -2,11 +2,12 @@ import sys
 import copy
 import time
 from collections import deque
+from collections import queue
 
 # Running script: given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
 class Variable:
-	def __init__(slef, row, col, domain, count, neighbor):
+	def __init__(self, row, col, domain, count, neighbor):
 		self.coordinate = row, col
 		self.domain = domain
 		self.count = count
@@ -53,6 +54,7 @@ class Sudoku(object):
 
 	def csp(self): 
 		variables = dict{}
+		arcs = []
 		for i in range(9):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
@@ -89,14 +91,37 @@ class Sudoku(object):
 					variables[(i, j)] = new_variable
 		return variables
 	
-	def AC3(self, queue = None, removals=None)
+	def AC3(self)
+		q = Queue()
+		variables = self.csp()
+		for k in variables:
+			variable = variables[k]
+			for j in variable.neighbor:
+				q.append((k,j))
+				
+		while not q.empty():
+			x_i,x_j = q.pop()
+			if self.revise(variables, x_i, x_j):
+				if variables[x_i].domain = 0:
+					return False
+				for x_k in variables[x_i].neighbor:
+					if x_k != x_j:
+						q.append(x_k, x_i)
+		return True
 	
-	def revise(self, x_domain, y_domain) #return true if we remove a value from the domain
+	def revise(self, variables, x_i, x_j) #return true if we remove a value from the domain
 		revised = False
-		for x in x_domain:
-			
-		
-	
+		for x in variables[x_i].domain:
+			flag = 0
+			for y in variables[x_j].domain:
+				if(y != x):
+					flag = 1
+					break
+			if flag == 0:
+				#TODO: delete x from x_i domain		
+				revised = True
+		return revised
+						
 	def find_solution(self):
 		
 		if self.find_empty_pos(list) is False:
