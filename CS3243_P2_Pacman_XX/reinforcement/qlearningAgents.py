@@ -59,10 +59,6 @@ class QLearningAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        # maxQvalue = self.getQValue(state, self.computeActionFromQValues(state))
-        # if maxQvalue is None:
-        #   return 0.0
-        # return maxQvalue
         legal_actions = self.getLegalActions(state)
 
         if not legal_actions:
@@ -88,13 +84,14 @@ class QLearningAgent(ReinforcementAgent):
         if not legal_actions:
           return None
         
-        best_action = ([], -999999)
+        best_action = ([], -9999999999999)
 
         for action in legal_actions:
           v = self.getQValue(state, action)
           if v > best_action[1]:
             best_action = ([action], v)
-          if v == best_action[1]:
+            continue
+          elif v == best_action[1]:
             best_action[0].append(action)
 
         return random.choice(best_action[0])
@@ -133,7 +130,7 @@ class QLearningAgent(ReinforcementAgent):
           Q(s, a) = Q(s, a) + a'(R(s) + y maxQ(next_s, next_a) - Q(s, a))
         """
         q_value = self.getQValue(state, action)
-        future_q = reward + self.discount * self.computeValueFromQValues(nextState) - q_value
+        future_q = reward + (self.discount * self.getValue(nextState)) - q_value
 
         self.q_values[(state, action)] = q_value + self.alpha * future_q
 
@@ -147,7 +144,7 @@ class QLearningAgent(ReinforcementAgent):
 class PacmanQAgent(QLearningAgent):
     "Exactly the same as QLearningAgent, but with different default parameters"
 
-    def __init__(self, epsilon=0.05,gamma=0.8,alpha=0.2, numTraining=0, **args):
+    def __init__(self, epsilon=0.10,gamma=0.85,alpha=0.7, numTraining=0, **args):
         """
         These default parameters can be changed from the pacman.py command line.
         For example, to change the exploration rate, try:
