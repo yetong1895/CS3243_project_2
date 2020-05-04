@@ -2,9 +2,18 @@ import sys
 import copy
 import time
 from collections import deque
+from Queue import PriorityQueue
+
 
 # Running script: given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
+class Variable:
+	def __init__(self, row, col, domain, count, neighbor):
+		self.coordinate = row, col
+		self.domain = domain
+		self.count = count
+		self.neighbor = neighbor #same row/col/subgrid
+
 class Sudoku(object):
 	def __init__(self, puzzle):
 		# you may add more attributes if you need
@@ -44,56 +53,83 @@ class Sudoku(object):
 	def is_valid(self, number, row, col):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
-	def select_variables(self):
-		min_value = 10
-		row = 0
-		col = 0
-		value_list = deque() #list to store possible values of that variable
+	def lcv(self):
+		variables = {}
 		for i in range(9):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
-					temp_list = deque()
-					count = 0 #number of possible values
-					for num in range(1, 10): #check for possible values
+					domain = []
+					count = 0
+					
+					#check for possible values
+					for num in range(1, 10): 
 						if(self.is_valid(num, i, j)):
-							temp_list.append(num)
+							domain.append(num)
 							count += 1
-					if(count == 0): #no possible values for this variable hence stop exploring
-						return False
-					elif(count < min_value): #update info
-						min_value = count
-						row = i
-						col = j
-						value_list = temp_list
+							
+					#check for neighbor
+					neighbor = deque()
+					#check for same row
+					for col in range(9): 
+						if((self.puzzle[i][col] == 0) and (col != j)): 
+							neighbor.append((i, col))
+					
+					#check for same column
+					for row in range(9): 
+						if((self.puzzle[row][j] == 0) and (row != i)):
+							neighbor.append((row, j))
+					
+					#check for same subgrid
+					row_start = i - i%3
+					col_start = j - j%3
+					for s_i in range(3):
+						for s_j in range(3):
+							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
+								neighbor.append((row_start + s_i, col_start + s_j))
+					new_variable = Variable(i, j, domain, count, neighbor) #create new variable		
+					variables[(i, j)] = new_variable
+		return variables
+
+	def select_values(self, variable, variables):
+		value_list = PriorityQueue()
+		domain = variable.domain
+		for i in domain:
+			count = 0
+			for j in variable.neighbor:
+				if(variables[j].domain.count(i) == 1):
+					count += 1
 						
-		return row, col, value_list, min_value
+			value_list.put((count, j))
+						
+		return value_list
 	
-	def find_solution(self):
+	def find_solution(self, variables):
 		
 		if self.find_empty_pos(list) is False:
 			#no more empty space
 			return True
+		for key, value in variables.iteritems():
+			value_list = self.select_values(value, variables)	
 			
-		if(self.select_variables() is False):
-			return False
-		else:
-			row, col, value_list, number_of_values = self.select_variables()
-			while(number_of_values > 0):
-				num = value_list.popleft()
-				number_of_values -= 1
-				self.puzzle[row][col] = num
+			if(self.select_values(value, variables) is False):
+				return False
+			else:
+				while not value_list.empty():
+					count, value = value_list.get()
+					self.puzzle[key[0]][key[1]] = value
 				
-				if(self.find_solution()):
-					return True
+					if(self.find_solution(variables)):
+						return True
 					
-				self.puzzle[row][col] = 0
+					self.puzzle[row][col] = 0
 		#print('backtrack')
 		return False
 
 	def solve(self):
 		# TODO: Write your code here
 		start = time.time()
-		self.find_solution()
+		variables = self.lcv()
+		self.find_solution(variables)
 		end = time.time()
 		print (end - start)
 		self.ans = copy.deepcopy(puzzle)

@@ -54,7 +54,7 @@ class Sudoku(object):
 					return False
 		return True
 	
-	def check_validation(self, number, row, col):
+	def is_valid(self, number, row, col):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
 	def csp(self): 
@@ -67,7 +67,7 @@ class Sudoku(object):
 					
 					#check for possible values
 					for num in range(1, 10): 
-						if(self.check_validation(num, i, j)):
+						if(self.is_valid(num, i, j)):
 							domain.append(num)
 							count += 1
 							
@@ -138,7 +138,7 @@ class Sudoku(object):
 		variable = self.updated_variables[(row, col)]
 		domain = variable.domain
 		for number in domain:
-			if self.check_validation(number, row, col):
+			if self.is_valid(number, row, col):
 				self.puzzle[row][col] = number
 			
 				if(self.find_solution()):
