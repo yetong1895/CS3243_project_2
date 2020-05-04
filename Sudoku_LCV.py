@@ -3,20 +3,9 @@ import copy
 import time
 from collections import deque
 
-#import Queue
-
 # Running script: given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
-class Variable:
-	def __init__(self, row, col, domain, count, neighbor):
-		self.coordinate = row, col
-		self.domain = domain
-		self.count = count
-		self.neighbor = neighbor #same row/col/subgrid
-
-
 class Sudoku(object):
-	updated_variables = {}
 	def __init__(self, puzzle):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
@@ -26,8 +15,6 @@ class Sudoku(object):
 		for i in range(9):
 			for j in range(9):
 				if self.puzzle[i][j] == 0:
-					list[0] = i
-					list[1] = j
 					return True
 		return False
 					
@@ -54,108 +41,59 @@ class Sudoku(object):
 					return False
 		return True
 	
-	def check_validation(self, number, row, col):
+	def is_valid(self, number, row, col):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
-	def csp(self): 
-		variables = {}
+	def select_variables(self):
+		min_value = 10
+		row = 0
+		col = 0
+		value_list = deque() #list to store possible values of that variable
 		for i in range(9):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
-					domain = []
-					count = 0
-					
-					#check for possible values
-					for num in range(1, 10): 
-						if(self.check_validation(num, i, j)):
-							domain.append(num)
+					temp_list = deque()
+					count = 0 #number of possible values
+					for num in range(1, 10): #check for possible values
+						if(self.is_valid(num, i, j)):
+							temp_list.append(num)
 							count += 1
-							
-					#check for neighbor
-					neighbor = deque()
-					#check for same row
-					for col in range(9): 
-						if((self.puzzle[i][col] == 0) and (col != j)): 
-							neighbor.append((i, col))
-					
-					#check for same column
-					for row in range(9): 
-						if((self.puzzle[row][j] == 0) and (row != i)):
-							neighbor.append((row, j))
-					
-					#check for same subgrid
-					row_start = i - i%3
-					col_start = j - j%3
-					for s_i in range(3):
-						for s_j in range(3):
-							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
-								neighbor.append((row_start + s_i, col_start + s_j))
-					new_variable = Variable(i, j, domain, count, neighbor) #create new variable		
-					variables[(i, j)] = new_variable
-		return variables
-	
-	def AC3(self, variables):
-		q = list()
-		for k in variables:
-			variable = variables[k]
-			for j in variable.neighbor:
-				q.append((k, j))
-				
-		while len(q) > 0:
-			x_i,x_j = q.pop() #x_i is key, x_j is key of neighbor
-			if self.revise(variables, x_i, x_j):
-				if len(variables[x_i].domain) == 0:
-					return False
-				for x_k in variables[x_i].neighbor:
-					if x_k != x_j:
-						q.append((x_k, x_i))
-		
-		self.updated_variables = variables
-		return True
-	
-	def revise(self, variables, x_i, x_j): #return true if we remove a value from the domain
-		revised = False
-		for x in variables[x_i].domain:
-			flag = 0
-			for y in variables[x_j].domain:
-				if(y != x):
-					flag = 1
-					break
-			if flag == 0:
-				variables[x_i].domain.remove(x)
-				revised = True
-		return revised
+					if(count == 0): #no possible values for this variable hence stop exploring
+						return False
+					elif(count < min_value): #update info
+						min_value = count
+						row = i
+						col = j
+						value_list = temp_list
 						
+		return row, col, value_list, min_value
+	
 	def find_solution(self):
-		list = [0,0]
+		
 		if self.find_empty_pos(list) is False:
 			#no more empty space
 			return True
 			
-		row = list[0]
-		col = list[1]
-		
-		variable = self.updated_variables[(row, col)]
-		domain = variable.domain
-		for number in domain:
-			if self.check_validation(number, row, col):
-				self.puzzle[row][col] = number
-			
+		if(self.select_variables() is False):
+			return False
+		else:
+			row, col, value_list, number_of_values = self.select_variables()
+			while(number_of_values > 0):
+				num = value_list.popleft()
+				number_of_values -= 1
+				self.puzzle[row][col] = num
+				
 				if(self.find_solution()):
 					return True
-				
-			self.puzzle[row][col] = 0
-	
+					
+				self.puzzle[row][col] = 0
+		#print('backtrack')
 		return False
 
 	def solve(self):
 		# TODO: Write your code here
 		start = time.time()
-		variables = self.csp()
-		if(self.AC3(variables) is False):
-			return False
-		else:
-			self.find_solution()
+		self.find_solution()
 		end = time.time()
 		print (end - start)
 		self.ans = copy.deepcopy(puzzle)
