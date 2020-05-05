@@ -2,8 +2,8 @@ import sys
 import copy
 import time
 from collections import deque
+from Queue import PriorityQueue
 
-#import Queue
 
 # Running script: given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
@@ -14,9 +14,7 @@ class Variable:
 		self.count = count
 		self.neighbor = neighbor #same row/col/subgrid
 
-
 class Sudoku(object):
-	updated_variables = {}
 	def __init__(self, puzzle):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
@@ -26,8 +24,6 @@ class Sudoku(object):
 		for i in range(9):
 			for j in range(9):
 				if self.puzzle[i][j] == 0:
-					list[0] = i
-					list[1] = j
 					return True
 		return False
 					
@@ -57,7 +53,7 @@ class Sudoku(object):
 	def is_valid(self, number, row, col):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
-	def csp(self): 
+	def lcv(self):
 		variables = {}
 		for i in range(9):
 			for j in range(9):
@@ -93,69 +89,47 @@ class Sudoku(object):
 					new_variable = Variable(i, j, domain, count, neighbor) #create new variable		
 					variables[(i, j)] = new_variable
 		return variables
-	
-	def AC3(self, variables):
-		q = list()
-		for k in variables:
-			variable = variables[k]
+
+	def select_values(self, variable, variables):
+		value_list = PriorityQueue()
+		domain = variable.domain
+		for i in domain:
+			count = 0
 			for j in variable.neighbor:
-				q.append((k, j))
-				
-		while len(q) > 0:
-			x_i,x_j = q.pop() #x_i is key, x_j is key of neighbor
-			if self.revise(variables, x_i, x_j):
-				if len(variables[x_i].domain) == 0:
-					return False
-				for x_k in variables[x_i].neighbor:
-					if x_k != x_j:
-						q.append((x_k, x_i))
-		
-		self.updated_variables = variables
-		return True
-	
-	def revise(self, variables, x_i, x_j): #return true if we remove a value from the domain
-		revised = False
-		for x in variables[x_i].domain:
-			flag = 0
-			for y in variables[x_j].domain:
-				if(y != x):
-					flag = 1
-					break
-			if flag == 0:
-				variables[x_i].domain.remove(x)
-				revised = True
-		return revised
+				if(variables[j].domain.count(i) == 1):
+					count += 1
 						
-	def find_solution(self):
-		list = [0,0]
+			value_list.put((count, j))
+						
+		return value_list
+	
+	def find_solution(self, variables):
+		
 		if self.find_empty_pos(list) is False:
 			#no more empty space
 			return True
+		for key, value in variables.iteritems():
+			value_list = self.select_values(value, variables)	
 			
-		row = list[0]
-		col = list[1]
-		
-		variable = self.updated_variables[(row, col)]
-		domain = variable.domain
-		for number in domain:
-			if self.is_valid(number, row, col):
-				self.puzzle[row][col] = number
-			
-				if(self.find_solution()):
-					return True
+			if(self.select_values(value, variables) is False):
+				return False
+			else:
+				while not value_list.empty():
+					count, value = value_list.get()
+					self.puzzle[key[0]][key[1]] = value
 				
-			self.puzzle[row][col] = 0
-	
+					if(self.find_solution(variables)):
+						return True
+					
+					self.puzzle[row][col] = 0
+		#print('backtrack')
 		return False
 
 	def solve(self):
 		# TODO: Write your code here
 		start = time.time()
-		variables = self.csp()
-		if(self.AC3(variables) is False):
-			return False
-		else:
-			self.find_solution()
+		variables = self.lcv()
+		self.find_solution(variables)
 		end = time.time()
 		print (end - start)
 		self.ans = copy.deepcopy(puzzle)
