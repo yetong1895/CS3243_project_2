@@ -28,8 +28,8 @@ MRV_timing = []
 
 # read inputs
 
-for filename in os.listdir(os.getcwd() + "/public_tests_p2_sudoku/"):
-	with open(os.path.join(os.getcwd() + "/public_tests_p2_sudoku/", filename), 'r') as f:
+for filename in os.listdir(os.getcwd() + "/testcases/"):
+	with open(os.path.join(os.getcwd() + "/testcases/", filename), 'r') as f:
 		# Taken from main
 		puzzle = readPuzzle(f)
 		# run each algorithm for 5 times and take average
@@ -44,8 +44,11 @@ for filename in os.listdir(os.getcwd() + "/public_tests_p2_sudoku/"):
 
 		for i in range(5):
 			sudoku_AC3.solve()
+			print("AC3 time ", sudoku_AC3.time)
 			sudoku_LCV.solve()
+			print("LCV time ", sudoku_LCV.time)
 			sudoku_MRV.solve()
+			print("MRV time ", sudoku_MRV.time)
 
 			t_AC3 = sudoku_AC3.time
 			t_LCV = sudoku_LCV.time
