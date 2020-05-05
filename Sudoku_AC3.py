@@ -8,10 +8,9 @@ from collections import deque
 # Running script: given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
 class Variable:
-	def __init__(self, row, col, domain, count, neighbor):
+	def __init__(self, row, col, domain, neighbor):
 		self.coordinate = row, col
 		self.domain = domain
-		self.count = count
 		self.neighbor = neighbor #same row/col/subgrid
 
 
@@ -63,13 +62,11 @@ class Sudoku(object):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
 					domain = []
-					count = 0
 					
 					#check for possible values
 					for num in range(1, 10): 
 						if(self.is_valid(num, i, j)):
 							domain.append(num)
-							count += 1
 							
 					#check for neighbor
 					neighbor = deque()
@@ -90,7 +87,7 @@ class Sudoku(object):
 						for s_j in range(3):
 							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
 								neighbor.append((row_start + s_i, col_start + s_j))
-					new_variable = Variable(i, j, domain, count, neighbor) #create new variable		
+					new_variable = Variable(i, j, domain, neighbor) #create new variable		
 					variables[(i, j)] = new_variable
 		return variables
 	

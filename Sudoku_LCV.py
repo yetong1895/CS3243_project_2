@@ -8,10 +8,9 @@ from Queue import PriorityQueue
 # Running script: given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
 class Variable:
-	def __init__(self, row, col, domain, count, neighbor):
+	def __init__(self, row, col, domain, neighbor):
 		self.coordinate = row, col
 		self.domain = domain
-		self.count = count
 		self.neighbor = neighbor #same row/col/subgrid
 
 class Sudoku(object):
@@ -24,6 +23,8 @@ class Sudoku(object):
 		for i in range(9):
 			for j in range(9):
 				if self.puzzle[i][j] == 0:
+					list[0] = i
+					list[1] = j
 					return True
 		return False
 					
@@ -59,13 +60,11 @@ class Sudoku(object):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
 					domain = []
-					count = 0
 					
 					#check for possible values
 					for num in range(1, 10): 
 						if(self.is_valid(num, i, j)):
 							domain.append(num)
-							count += 1
 							
 					#check for neighbor
 					neighbor = deque()
@@ -86,7 +85,7 @@ class Sudoku(object):
 						for s_j in range(3):
 							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
 								neighbor.append((row_start + s_i, col_start + s_j))
-					new_variable = Variable(i, j, domain, count, neighbor) #create new variable		
+					new_variable = Variable(i, j, domain, neighbor) #create new variable		
 					variables[(i, j)] = new_variable
 		return variables
 
@@ -96,32 +95,34 @@ class Sudoku(object):
 		for i in domain:
 			count = 0
 			for j in variable.neighbor:
-				if(variables[j].domain.count(i) == 1):
+				if(variables[j].domain.count(i) == 1): #count the number of times that the value appears in the neighbour domain
 					count += 1
 						
-			value_list.put((count, j))
+			value_list.put((count, i))
 						
 		return value_list
 	
 	def find_solution(self, variables):
-		
+		list = [0,0]
 		if self.find_empty_pos(list) is False:
 			#no more empty space
 			return True
-		for key, value in variables.iteritems():
-			value_list = self.select_values(value, variables)	
+		
+		row = list[0]
+		col = list[1]
+		
+		variable = variables[(row, col)]
+		value_list = self.select_values(variable, variables)
+		
+		while not value_list.empty():
+			value = value_list.get()[1]
+			if self.is_valid(value, row, col):
+				self.puzzle[row][col] = value
+		
+				if(self.find_solution(variables)):
+					return True
 			
-			if(self.select_values(value, variables) is False):
-				return False
-			else:
-				while not value_list.empty():
-					count, value = value_list.get()
-					self.puzzle[key[0]][key[1]] = value
-				
-					if(self.find_solution(variables)):
-						return True
-					
-					self.puzzle[row][col] = 0
+			self.puzzle[row][col] = 0
 		#print('backtrack')
 		return False
 
