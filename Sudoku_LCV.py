@@ -85,8 +85,8 @@ class Sudoku(object):
 						for s_j in range(3):
 							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
 								neighbor.append((row_start + s_i, col_start + s_j))
-								
-					new_variable = Variable(i, j, domain, neighbor) #create new variable		
+
+					new_variable = Variable(i, j, domain, neighbor) #create new variable
 					variables[(i, j)] = new_variable
 		return variables
 
@@ -98,9 +98,8 @@ class Sudoku(object):
 			for j in variable.neighbor:
 				if(variables[j].domain.count(i) == 1): #count the number of times that the value appears in the neighbour domain
 					count += 1
-						
 			value_list.put((count, i))
-						
+
 		return value_list
 
 	def find_solution(self, variables):
@@ -108,21 +107,21 @@ class Sudoku(object):
 		if self.find_empty_pos(list) is False:
 			#no more empty space
 			return True
-		
+
 		row = list[0]
 		col = list[1]
-		
+
 		variable = variables[(row, col)]
 		value_list = self.select_values(variable, variables)
-		
+
 		while not value_list.empty():
 			value = value_list.get()[1]
 			if self.is_valid(value, row, col):
 				self.puzzle[row][col] = value
-		
+
 				if(self.find_solution(variables)):
 					return True
-			
+
 			self.puzzle[row][col] = 0
 		#print('backtrack')
 		return False

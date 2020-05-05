@@ -87,9 +87,7 @@ class Sudoku(object):
 						for s_j in range(3):
 							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
 								neighbor.append((row_start + s_i, col_start + s_j))
-								
-					new_variable = Variable(i, j, domain, neighbor) #create new variable		
-
+					new_variable = Variable(i, j, domain, neighbor) #create new variable
 					variables[(i, j)] = new_variable
 		return variables
 

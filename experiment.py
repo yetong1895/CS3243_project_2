@@ -3,6 +3,7 @@ import Sudoku_AC3
 import Sudoku_LCV
 import Sudoku_MRV
 import os
+import copy
 #import matplotlib.pyplot as plt
 
 def readPuzzle(file):
@@ -27,22 +28,21 @@ MRV_timing = []
 
 
 # read inputs
-
 for filename in os.listdir(os.getcwd() + "/testcases/"):
 	with open(os.path.join(os.getcwd() + "/testcases/", filename), 'r') as f:
 		# Taken from main
 		puzzle = readPuzzle(f)
-		# run each algorithm for 5 times and take average
-		sudoku_AC3 = Sudoku_AC3.Sudoku(puzzle)
-		sudoku_LCV = Sudoku_LCV.Sudoku(puzzle)
-		sudoku_MRV = Sudoku_MRV.Sudoku(puzzle)
-
-
 		time_AC3 = 0
 		time_LCV = 0
 		time_MRV = 0
 
+		# run each algorithm for 5 times and take average
 		for i in range(5):
+
+			sudoku_AC3 = Sudoku_AC3.Sudoku(copy.deepcopy(puzzle))
+			sudoku_LCV = Sudoku_LCV.Sudoku(copy.deepcopy(puzzle))
+			sudoku_MRV = Sudoku_MRV.Sudoku(copy.deepcopy(puzzle))
+
 			sudoku_AC3.solve()
 			print("AC3 time ", sudoku_AC3.time)
 			sudoku_LCV.solve()
@@ -62,6 +62,11 @@ for filename in os.listdir(os.getcwd() + "/testcases/"):
 		ave_time_LCV = time_LCV / 5
 		ave_time_MRV = time_MRV / 5
 
+		print(ave_time_AC3)
+		print(ave_time_LCV)
+		print(ave_time_MRV)
+
+
 		AC_3_timing.append(ave_time_AC3)
 		LCV_timing.append(ave_time_LCV)
 		MRV_timing.append(ave_time_MRV)
@@ -69,6 +74,7 @@ for filename in os.listdir(os.getcwd() + "/testcases/"):
 # Mean time over all test cases
 print("Mean time AC3: ", sum(AC_3_timing) / len(AC_3_timing))
 print("Mean time MRV: ", sum(MRV_timing) / len(MRV_timing))
+
 print("Mean time LCV: ", sum(LCV_timing) / len(LCV_timing))
 
 AC3_range = max(AC_3_timing) - min(AC_3_timing)
