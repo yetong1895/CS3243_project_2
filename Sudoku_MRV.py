@@ -95,9 +95,9 @@ class Sudoku(object):
 		start = time.time()
 		self.find_solution()
 		end = time.time()
-		print (end - start)
-		self.ans = copy.deepcopy(puzzle)
+		#print (end - start)
 		self.time = end - start
+		self.ans = copy.deepcopy(self.puzzle)
 		# self.ans is a list of lists
 		return self.ans
 
