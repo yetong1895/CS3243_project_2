@@ -10,37 +10,37 @@ class Sudoku(object):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
 		self.ans = copy.deepcopy(puzzle) # self.ans is a list of lists
-
+		
 	def find_empty_pos(self, list):
 		for i in range(9):
 			for j in range(9):
 				if self.puzzle[i][j] == 0:
 					return True
 		return False
-
+					
 
 	def not_in_col(self, number, col):
 		for i in range(9):
 			if self.puzzle[i][col] == number:
 				return False
 		return True
-
+	
 	def not_in_row(self, number, row):
 		for i in range(9):
 			if self.puzzle[row][i] == number:
 				return False
 		return True
-
+	
 	def not_in_subgrid(self, number, row, col):
 		row_start = row - row % 3
 		col_start = col - col % 3
-
+		
 		for i in range(3):
 			for j in range(3):
 				if self.puzzle[row_start + i][col_start + j] == number:
 					return False
 		return True
-
+	
 	def is_valid(self, number, row, col):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
@@ -65,15 +65,15 @@ class Sudoku(object):
 						row = i
 						col = j
 						value_list = temp_list
-
+						
 		return row, col, value_list, min_value
-
+	
 	def find_solution(self):
-
+		
 		if self.find_empty_pos(list) is False:
 			#no more empty space
 			return True
-
+			
 		if(self.select_variables() is False):
 			return False
 		else:
@@ -82,10 +82,10 @@ class Sudoku(object):
 				num = value_list.popleft()
 				number_of_values -= 1
 				self.puzzle[row][col] = num
-
+				
 				if(self.find_solution()):
 					return True
-
+					
 				self.puzzle[row][col] = 0
 		#print('backtrack')
 		return False
@@ -95,9 +95,8 @@ class Sudoku(object):
 		start = time.time()
 		self.find_solution()
 		end = time.time()
-		#print (end - start)
-		self.time = end - start
-		self.ans = copy.deepcopy(self.puzzle)
+		print (end - start)
+		self.ans = copy.deepcopy(puzzle)
 		# self.ans is a list of lists
 		return self.ans
 

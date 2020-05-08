@@ -18,7 +18,7 @@ class Sudoku(object):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
 		self.ans = copy.deepcopy(puzzle) # self.ans is a list of lists
-
+		
 	def find_empty_pos(self, list):
 		for i in range(9):
 			for j in range(9):
@@ -27,30 +27,30 @@ class Sudoku(object):
 					list[1] = j
 					return True
 		return False
-
+					
 
 	def not_in_col(self, number, col):
 		for i in range(9):
 			if self.puzzle[i][col] == number:
 				return False
 		return True
-
+	
 	def not_in_row(self, number, row):
 		for i in range(9):
 			if self.puzzle[row][i] == number:
 				return False
 		return True
-
+	
 	def not_in_subgrid(self, number, row, col):
 		row_start = row - row % 3
 		col_start = col - col % 3
-
+		
 		for i in range(3):
 			for j in range(3):
 				if self.puzzle[row_start + i][col_start + j] == number:
 					return False
 		return True
-
+	
 	def is_valid(self, number, row, col):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
@@ -60,24 +60,24 @@ class Sudoku(object):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
 					domain = []
-
+					
 					#check for possible values
-					for num in range(1, 10):
+					for num in range(1, 10): 
 						if(self.is_valid(num, i, j)):
 							domain.append(num)
-
+							
 					#check for neighbor
 					neighbor = deque()
 					#check for same row
-					for col in range(9):
-						if((self.puzzle[i][col] == 0) and (col != j)):
+					for col in range(9): 
+						if((self.puzzle[i][col] == 0) and (col != j)): 
 							neighbor.append((i, col))
-
+					
 					#check for same column
-					for row in range(9):
+					for row in range(9): 
 						if((self.puzzle[row][j] == 0) and (row != i)):
 							neighbor.append((row, j))
-
+					
 					#check for same subgrid
 					row_start = i - i%3
 					col_start = j - j%3
@@ -85,8 +85,7 @@ class Sudoku(object):
 						for s_j in range(3):
 							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
 								neighbor.append((row_start + s_i, col_start + s_j))
-
-					new_variable = Variable(i, j, domain, neighbor) #create new variable
+					new_variable = Variable(i, j, domain, neighbor) #create new variable		
 					variables[(i, j)] = new_variable
 		return variables
 
@@ -98,30 +97,31 @@ class Sudoku(object):
 			for j in variable.neighbor:
 				if(variables[j].domain.count(i) == 1): #count the number of times that the value appears in the neighbour domain
 					count += 1
+						
 			value_list.put((count, i))
-
+						
 		return value_list
-
+	
 	def find_solution(self, variables):
 		list = [0,0]
 		if self.find_empty_pos(list) is False:
 			#no more empty space
 			return True
-
+		
 		row = list[0]
 		col = list[1]
-
+		
 		variable = variables[(row, col)]
 		value_list = self.select_values(variable, variables)
-
+		
 		while not value_list.empty():
 			value = value_list.get()[1]
 			if self.is_valid(value, row, col):
 				self.puzzle[row][col] = value
-
+		
 				if(self.find_solution(variables)):
 					return True
-
+			
 			self.puzzle[row][col] = 0
 		#print('backtrack')
 		return False
@@ -132,9 +132,8 @@ class Sudoku(object):
 		variables = self.lcv()
 		self.find_solution(variables)
 		end = time.time()
-		# print (end - start)
-		self.time = end - start
-		self.ans = copy.deepcopy(self.puzzle)
+		print (end - start)
+		self.ans = copy.deepcopy(puzzle)
 		# self.ans is a list of lists
 		return self.ans
 

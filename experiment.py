@@ -28,8 +28,8 @@ MRV_timing = []
 
 
 # read inputs
-for filename in os.listdir(os.getcwd() + "/testcases/"):
-	with open(os.path.join(os.getcwd() + "/testcases/", filename), 'r') as f:
+for filename in os.listdir(os.getcwd() + "/tc1/"):
+	with open(os.path.join(os.getcwd() + "/tc1/", filename), 'r') as f:
 		# Taken from main
 		puzzle = readPuzzle(f)
 		time_AC3 = 0
@@ -65,7 +65,7 @@ for filename in os.listdir(os.getcwd() + "/testcases/"):
 		print(ave_time_AC3)
 		print(ave_time_LCV)
 		print(ave_time_MRV)
-
+		print("------------------------")
 
 		AC_3_timing.append(ave_time_AC3)
 		LCV_timing.append(ave_time_LCV)
