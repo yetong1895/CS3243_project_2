@@ -37,7 +37,7 @@ for filename in os.listdir(os.getcwd() + "/testcases/"):
 		time_MRV = 0
 
 		# run each algorithm for 5 times and take average
-		for i in range(5):
+		#for i in range(5):
 
 			sudoku_AC3 = Sudoku_AC3.Sudoku(copy.deepcopy(puzzle))
 			sudoku_LCV = Sudoku_LCV.Sudoku(copy.deepcopy(puzzle))
@@ -51,17 +51,17 @@ for filename in os.listdir(os.getcwd() + "/testcases/"):
 			t_LCV = sudoku_LCV.time
 			t_MRV = sudoku_MRV.time
 
-			time_AC3 += t_AC3
-			time_LCV += t_LCV
-			time_MRV += t_MRV
+			#time_AC3 += t_AC3
+			#time_LCV += t_LCV
+			#time_MRV += t_MRV
 
-		ave_time_AC3 = time_AC3 / 5
-		ave_time_LCV = time_LCV / 5
-		ave_time_MRV = time_MRV / 5
+		#ave_time_AC3 = time_AC3 / 5
+		#ave_time_LCV = time_LCV / 5
+		#ave_time_MRV = time_MRV / 5
 
-		print(ave_time_AC3)
-		print(ave_time_LCV)
-		print(ave_time_MRV)
+		#print(ave_time_AC3)
+		#print(ave_time_LCV)
+		#print(ave_time_MRV)
 
 
 		AC_3_timing.append(ave_time_AC3)
