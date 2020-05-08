@@ -28,8 +28,8 @@ MRV_timing = []
 
 
 # read inputs
-for filename in os.listdir(os.getcwd() + "/testcases/"):
-	with open(os.path.join(os.getcwd() + "/testcases/", filename), 'r') as f:
+for filename in os.listdir(os.getcwd() + "/tc1/"):
+	with open(os.path.join(os.getcwd() + "/tc1/", filename), 'r') as f:
 		# Taken from main
 		puzzle = readPuzzle(f)
 		time_AC3 = 0
@@ -37,32 +37,35 @@ for filename in os.listdir(os.getcwd() + "/testcases/"):
 		time_MRV = 0
 
 		# run each algorithm for 5 times and take average
-		#for i in range(5):
+		for i in range(5):
 
 			sudoku_AC3 = Sudoku_AC3.Sudoku(copy.deepcopy(puzzle))
 			sudoku_LCV = Sudoku_LCV.Sudoku(copy.deepcopy(puzzle))
 			sudoku_MRV = Sudoku_MRV.Sudoku(copy.deepcopy(puzzle))
 
 			sudoku_AC3.solve()
-			sudoku_MRV.solve()
+			print("AC3 time ", sudoku_AC3.time)
 			sudoku_LCV.solve()
+			print("LCV time ", sudoku_LCV.time)
+			sudoku_MRV.solve()
+			print("MRV time ", sudoku_MRV.time)
 
 			t_AC3 = sudoku_AC3.time
 			t_LCV = sudoku_LCV.time
 			t_MRV = sudoku_MRV.time
 
-			#time_AC3 += t_AC3
-			#time_LCV += t_LCV
-			#time_MRV += t_MRV
+			time_AC3 += t_AC3
+			time_LCV += t_LCV
+			time_MRV += t_MRV
 
-		#ave_time_AC3 = time_AC3 / 5
-		#ave_time_LCV = time_LCV / 5
-		#ave_time_MRV = time_MRV / 5
+		ave_time_AC3 = time_AC3 / 5
+		ave_time_LCV = time_LCV / 5
+		ave_time_MRV = time_MRV / 5
 
-		#print(ave_time_AC3)
-		#print(ave_time_LCV)
-		#print(ave_time_MRV)
-
+		print(ave_time_AC3)
+		print(ave_time_LCV)
+		print(ave_time_MRV)
+		print("------------------------")
 
 		AC_3_timing.append(ave_time_AC3)
 		LCV_timing.append(ave_time_LCV)
@@ -88,5 +91,3 @@ width_LCV = LCV_range / 10
 # plt.hist(MRV_timing, bins=width_MRV)
 
 # plt.show()
-
-
