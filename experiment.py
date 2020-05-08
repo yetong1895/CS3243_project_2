@@ -28,8 +28,8 @@ MRV_timing = []
 
 
 # read inputs
-for filename in os.listdir(os.getcwd() + "/testcases/"):
-	with open(os.path.join(os.getcwd() + "/testcases/", filename), 'r') as f:
+for filename in os.listdir(os.getcwd() + "/tc1/"):
+	with open(os.path.join(os.getcwd() + "/tc1/", filename), 'r') as f:
 		# Taken from main
 		puzzle = readPuzzle(f)
 		time_AC3 = 0
@@ -44,8 +44,11 @@ for filename in os.listdir(os.getcwd() + "/testcases/"):
 			sudoku_MRV = Sudoku_MRV.Sudoku(copy.deepcopy(puzzle))
 
 			sudoku_AC3.solve()
-			sudoku_MRV.solve()
+			print("AC3 time ", sudoku_AC3.time)
 			sudoku_LCV.solve()
+			print("LCV time ", sudoku_LCV.time)
+			sudoku_MRV.solve()
+			print("MRV time ", sudoku_MRV.time)
 
 			t_AC3 = sudoku_AC3.time
 			t_LCV = sudoku_LCV.time
@@ -62,7 +65,7 @@ for filename in os.listdir(os.getcwd() + "/testcases/"):
 		print(ave_time_AC3)
 		print(ave_time_LCV)
 		print(ave_time_MRV)
-
+		print("------------------------")
 
 		AC_3_timing.append(ave_time_AC3)
 		LCV_timing.append(ave_time_LCV)

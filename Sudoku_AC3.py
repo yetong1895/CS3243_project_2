@@ -2,20 +2,13 @@ import sys
 import copy
 import time
 from collections import deque
-
-#import Queue
-
-# Running script: given code can be run with the command:
-# python file.py, ./path/to/init_state.txt ./output/output.txt
-class Variable:
-	def __init__(self, row, col, domain, neighbor):
-		self.coordinate = row, col
-		self.domain = domain
-		self.neighbor = neighbor #same row/col/subgrid
-
+from copy import deepcopy
 
 class Sudoku(object):
-	updated_variables = {}
+	domain_list = {}
+	neighbor_list = {}
+	q = list()
+	backtrack = 0
 	def __init__(self, puzzle):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
@@ -57,11 +50,10 @@ class Sudoku(object):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
 	def csp(self):
-		variables = {}
 		for i in range(9):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
-					domain = []
+					domain = list()
 
 					#check for possible values
 					for num in range(1, 10):
@@ -69,16 +61,18 @@ class Sudoku(object):
 							domain.append(num)
 
 					#check for neighbor
-					neighbor = deque()
+					neighbor = list()
 					#check for same row
 					for col in range(9):
 						if((self.puzzle[i][col] == 0) and (col != j)):
 							neighbor.append((i, col))
-
+							self.q.append(((i, j), (i ,col)))
+							
 					#check for same column
 					for row in range(9):
 						if((self.puzzle[row][j] == 0) and (row != i)):
 							neighbor.append((row, j))
+							self.q.append(((i, j), (row ,j)))
 
 					#check for same subgrid
 					row_start = i - i%3
@@ -87,39 +81,32 @@ class Sudoku(object):
 						for s_j in range(3):
 							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
 								neighbor.append((row_start + s_i, col_start + s_j))
-					new_variable = Variable(i, j, domain, neighbor) #create new variable
-					variables[(i, j)] = new_variable
-		return variables
+								self.q.append(((i, j), (row_start + s_i, col_start + s_j)))
+					
+					self.domain_list[(i, j)] = domain
+					self.neighbor_list[(i, j)] = neighbor
 
-	def AC3(self, variables):
-		q = list()
-		for k in variables:
-			variable = variables[k]
-			for j in variable.neighbor:
-				q.append((k, j))
-
-		while len(q) > 0:
-			x_i,x_j = q.pop() #x_i is key, x_j is key of neighbor
-			if self.revise(variables, x_i, x_j):
-				if len(variables[x_i].domain) == 0:
+	def AC3(self):
+		while len(self.q) > 0:
+			x_i,x_j = self.q.pop() #x_i is key, x_j is key of neighbor
+			if self.revise(x_i, x_j):
+				if len(self.domain_list[x_i]) == 0:
 					return False
-				for x_k in variables[x_i].neighbor:
+				for x_k in self.neighbor_list[x_i]:
 					if x_k != x_j:
-						q.append((x_k, x_i))
-
-		self.updated_variables = variables
+						self.q.append((x_k, x_i))
 		return True
 
-	def revise(self, variables, x_i, x_j): #return true if we remove a value from the domain
+	def revise(self, x_i, x_j): #return true if we remove a value from the domain
 		revised = False
-		for x in variables[x_i].domain:
+		for x in self.domain_list[x_i]:
 			flag = 0
-			for y in variables[x_j].domain:
+			for y in self.domain_list[x_j]:
 				if(y != x):
 					flag = 1
 					break
 			if flag == 0:
-				variables[x_i].domain.remove(x)
+				self.domain_list[x_i].remove(x)
 				revised = True
 		return revised
 
@@ -132,9 +119,7 @@ class Sudoku(object):
 		row = list[0]
 		col = list[1]
 
-		variable = self.updated_variables[(row, col)]
-		domain = variable.domain
-		for number in domain:
+		for number in self.domain_list[(row, col)]:
 			if self.is_valid(number, row, col):
 				self.puzzle[row][col] = number
 
@@ -142,20 +127,22 @@ class Sudoku(object):
 					return True
 
 			self.puzzle[row][col] = 0
-
+		
+		self.backtrack += 1
 		return False
 
 	def solve(self):
 		# TODO: Write your code here
 		start = time.time()
-		variables = self.csp()
-		if(self.AC3(variables) is False):
+		self.csp()
+		if(self.AC3() is False):
 			return False
 		else:
 			self.find_solution()
 		end = time.time()
-		# print (end - start)
-		self.time = end - start
+		print (end - start)
+		print self.backtrack
+		#self.time = end - start
 		self.ans = copy.deepcopy(self.puzzle)
 		# self.ans is a list of lists
 		return self.ans
