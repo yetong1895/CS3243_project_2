@@ -2,7 +2,7 @@ import sys
 import copy
 import time
 from collections import deque
-from Queue import PriorityQueue
+from queue import PriorityQueue
 
 
 # Running script: given code can be run with the command:
@@ -12,12 +12,14 @@ class Variable:
 		self.coordinate = row, col
 		self.domain = domain
 		self.neighbor = neighbor #same row/col/subgrid
+		self.num_backtrack = 0
 
 class Sudoku(object):
 	def __init__(self, puzzle):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
 		self.ans = copy.deepcopy(puzzle) # self.ans is a list of lists
+		self.num_backtrack = 0
 
 	def find_empty_pos(self, list):
 		for i in range(9):
@@ -124,6 +126,7 @@ class Sudoku(object):
 
 			self.puzzle[row][col] = 0
 		#print('backtrack')
+		self.num_backtrack += 1
 		return False
 
 	def solve(self):

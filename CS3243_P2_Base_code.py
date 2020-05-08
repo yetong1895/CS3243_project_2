@@ -8,7 +8,9 @@ class Sudoku(object):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
 		self.ans = copy.deepcopy(puzzle) # self.ans is a list of lists
-		
+		self.num_backtrack = 0
+
+
 	def find_empty_pos(self, list):
 		for i in range(9):
 			for j in range(9):
@@ -17,31 +19,31 @@ class Sudoku(object):
 					list[1] = j
 					return True
 		return False
-					
+
 
 	def check_col(self, number, col):
 		for i in range(9):
 			if self.puzzle[i][col] == number:
 				return False
 		return True
-	
+
 	def check_row(self, number, row):
 		for i in range(9):
 			if self.puzzle[row][i] == number:
 				return False
 		return True
-	
+
 	def check_square(self, number, row, col):
 		row_start = row - row % 3
 		col_start = col - col % 3
-		
+
 		for i in range(3):
 			for j in range(3):
 				if self.puzzle[row_start + i][col_start + j] == number:
 					return False
 		return True
 
-	
+
 	def check_validation(self, number, row, col):
 		return self.check_col(number, col) and self.check_row(number, row) and self.check_square(number, row, col)
 
@@ -51,10 +53,10 @@ class Sudoku(object):
 		if self.find_empty_pos(list) is False:
 			#no more empty space
 			return True
-			
+
 		row = list[0]
 		col = list[1]
-		
+
 		for number in range(1,10):
 			#print(number)
 			if self.check_validation(number, row, col):
@@ -65,8 +67,9 @@ class Sudoku(object):
 					return True
 
 			self.puzzle[row][col] = 0
-		
+
 		#print('backtrack')
+		self.num_backtrack += 1
 		return False
 
 	def solve(self):
@@ -74,10 +77,11 @@ class Sudoku(object):
 		start = time.time()
 		self.find_solution()
 		end = time.time()
-		print(end - start)
-		self.ans = copy.deepcopy(puzzle)
+		# print(end - start)
+		self.time = end - start
+		self.ans = copy.deepcopy(self.puzzle)
 		# self.ans is a list of lists
-		
+
 		return self.ans
 
 	# you may add more classes/functions if you think is useful

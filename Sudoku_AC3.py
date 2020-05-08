@@ -20,6 +20,7 @@ class Sudoku(object):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
 		self.ans = copy.deepcopy(puzzle) # self.ans is a list of lists
+		self.num_backtrack = 0
 
 	def find_empty_pos(self, list):
 		for i in range(9):
@@ -142,7 +143,7 @@ class Sudoku(object):
 					return True
 
 			self.puzzle[row][col] = 0
-
+		self.num_backtrack += 1
 		return False
 
 	def solve(self):
