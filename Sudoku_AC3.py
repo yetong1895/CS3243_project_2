@@ -8,7 +8,7 @@ class Sudoku(object):
 	domain_list = {}
 	neighbor_list = {}
 	q = list()
-	backtrack = 0
+	#backtrack = 0
 	def __init__(self, puzzle):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
@@ -128,7 +128,7 @@ class Sudoku(object):
 
 			self.puzzle[row][col] = 0
 		
-		self.backtrack += 1
+		#self.backtrack += 1
 		return False
 
 	def solve(self):
@@ -140,8 +140,8 @@ class Sudoku(object):
 		else:
 			self.find_solution()
 		end = time.time()
-		print (end - start)
-		print self.backtrack
+		#print (end - start)
+		#print self.backtrack
 		#self.time = end - start
 		self.ans = copy.deepcopy(self.puzzle)
 		# self.ans is a list of lists
