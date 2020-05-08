@@ -7,13 +7,10 @@ from Queue import PriorityQueue
 
 # Running script: given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
-class Variable:
-	def __init__(self, row, col, domain, neighbor):
-		self.coordinate = row, col
-		self.domain = domain
-		self.neighbor = neighbor #same row/col/subgrid
 
 class Sudoku(object):
+	neighbor_list = {}
+	domain_list = {}
 	def __init__(self, puzzle):
 		# you may add more attributes if you need
 		self.puzzle = puzzle # self.puzzle is a list of lists
@@ -28,7 +25,6 @@ class Sudoku(object):
 					return True
 		return False
 					
-
 	def not_in_col(self, number, col):
 		for i in range(9):
 			if self.puzzle[i][col] == number:
@@ -55,29 +51,29 @@ class Sudoku(object):
 		return self.not_in_col(number, col) and self.not_in_row(number, row) and self.not_in_subgrid(number, row, col)
 
 	def lcv(self):
-		variables = {}
+		domain_list = {}
 		for i in range(9):
 			for j in range(9):
 				if(self.puzzle[i][j] == 0): #find a variable
 					domain = []
-					
+
 					#check for possible values
-					for num in range(1, 10): 
+					for num in range(1, 10):
 						if(self.is_valid(num, i, j)):
 							domain.append(num)
-							
+
 					#check for neighbor
-					neighbor = deque()
+					neighbor = []
 					#check for same row
-					for col in range(9): 
-						if((self.puzzle[i][col] == 0) and (col != j)): 
+					for col in range(9):
+						if((self.puzzle[i][col] == 0) and (col != j)):
 							neighbor.append((i, col))
-					
+
 					#check for same column
-					for row in range(9): 
+					for row in range(9):
 						if((self.puzzle[row][j] == 0) and (row != i)):
 							neighbor.append((row, j))
-					
+
 					#check for same subgrid
 					row_start = i - i%3
 					col_start = j - j%3
@@ -85,21 +81,19 @@ class Sudoku(object):
 						for s_j in range(3):
 							if((self.puzzle[row_start + s_i][col_start + s_j] == 0) and (row_start + s_i != i) and (col_start + s_j != j)):
 								neighbor.append((row_start + s_i, col_start + s_j))
-					new_variable = Variable(i, j, domain, neighbor) #create new variable		
-					variables[(i, j)] = new_variable
-		return variables
-
-	def select_values(self, variable, variables):
+					self.domain_list[(i, j)] = domain
+					self.neighbor_list[(i, j)] = neighbor
+		
+	def select_values(self, current_variable):
 		value_list = PriorityQueue()
-		domain = variable.domain
-		for i in domain:
+		for i in self.domain_list[current_variable]: #evaluate a value in the domain
 			count = 0
-			for j in variable.neighbor:
-				if(variables[j].domain.count(i) == 1): #count the number of times that the value appears in the neighbour domain
-					count += 1
-						
-			value_list.put((count, i))
-						
+			for j in self.neighbor_list[current_variable]: 
+				if(puzzle[j[0]][j[1]] == 0):
+					if(i in self.domain_list[j]):
+						count += 1
+			value_list.put((count, i))		
+		
 		return value_list
 	
 	def find_solution(self, variables):
@@ -111,9 +105,7 @@ class Sudoku(object):
 		row = list[0]
 		col = list[1]
 		
-		variable = variables[(row, col)]
-		value_list = self.select_values(variable, variables)
-		
+		value_list = self.select_values((row, col))
 		while not value_list.empty():
 			value = value_list.get()[1]
 			if self.is_valid(value, row, col):
