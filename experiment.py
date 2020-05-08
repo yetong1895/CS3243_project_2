@@ -91,5 +91,3 @@ width_LCV = LCV_range / 10
 # plt.hist(MRV_timing, bins=width_MRV)
 
 # plt.show()
-
-
